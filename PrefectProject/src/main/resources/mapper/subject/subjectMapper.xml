@@ -1,0 +1,104 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper
+  PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+  "https://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<!-- Dao: query찾는 분류 기준 
+namespace+id -> com.pcwk.ehr.user.doSelectOne
+-->  
+<mapper namespace="com.pcwk.ehr.subject">
+
+
+
+    <select id="doRetrieve" parameterType="SubjectVO" resultType="SubjectVO">
+        
+		SELECT
+		    s.subject_code,
+		    s.course_code,
+		    s.professor,
+		    s.trainee,
+		    s.score,
+		    c.DET_NAME
+		FROM
+		    subject s
+		JOIN
+		    users u ON
+		    (
+		        (u.email = s.professor AND u.role = 20)
+		        OR
+		        (u.email = s.trainee AND u.role = 30)
+		    )
+		JOIN
+		    CMN_CODE c ON c.MST_CODE = 'SUBJECT' AND c.DET_CODE = s.subject_code
+		WHERE
+		    (
+		        u.role = 20 
+		        AND 
+		        s.course_code IN (
+		            SELECT course_code 
+		            FROM subject 
+		            WHERE professor = #{email}
+		        )
+		    )
+		    OR
+		    (
+		        u.role = 30 
+		        AND 
+		        u.email = #{email}
+		    )
+
+    
+        
+    </select>
+
+	
+	
+
+	<select id="doSelectOne" parameterType="SubjectVO" resultType="SubjectVO">
+		SELECT
+		    subject_code,
+		    course_code,
+		    professor,
+		    trainee,
+		    score
+		FROM
+		    subject
+		WHERE
+	        trainee = #{email}
+	
+	</select>
+	
+	<update id="doUpdate" parameterType="SubjectVO">
+	    UPDATE subject
+	    SET
+	        subject_code = #{subjectCode},
+	        course_code = #{courseCode},
+	        professor = #{professor},
+	        trainee = #{trainee},
+	        score = #{score}
+	    WHERE
+	        subject_code = #{subjectCode} AND
+	        course_code = #{courseCode} AND
+	        trainee = #{trainee};
+	</update>
+	
+
+
+
+    
+    <insert id="doSave" parameterType="SubjectVO">
+	    INSERT INTO subject (
+	    subject_code,
+	    course_code,
+	    professor,
+	    trainee,
+	    score
+	) VALUES (
+	    #{subjectCode},
+	    #{courseCode},
+	    #{professor},
+	    #{trainee},
+	    #{score}
+	)
+    </insert>
+
+</mapper>  
